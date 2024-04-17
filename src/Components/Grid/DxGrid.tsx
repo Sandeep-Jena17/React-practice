@@ -37,7 +37,7 @@ const onExporting = (e: DataGridTypes.ExportingEvent) => {
     workbook.xlsx.writeBuffer().then((buffer) => {
       saveAs(
         new Blob([buffer], { type: "application/octet-stream" }),
-        "DataGrid.xlsx"
+        "Media Mather.xlsx"
       );
     });
   });
@@ -115,14 +115,14 @@ options.totalValue=totalSummary.finalCommission
         name="CPC"
         summaryType="custom"
         // valueFormat="currency"
-        displayFormat="Average CPC: {0}"
+        displayFormat="Average CPC: $ {0}"
         showInColumn="CPC"
       />
        <TotalItem
         name="commission"
         summaryType="custom"
         // valueFormat="currency"
-        displayFormat="Commission: {0}"
+        displayFormat="Commission: $ {0}"
         showInColumn="Total Commission"
       />
        <TotalItem
