@@ -10,6 +10,8 @@ import DataGrid, {
   DataGridTypes,
   Summary,
   TotalItem,
+  SortByGroupSummaryInfo,
+  GroupItem,
 } from "devextreme-react/data-grid";
 import { Workbook } from "exceljs";
 import { saveAs } from "file-saver";
@@ -51,21 +53,76 @@ const  DxGrid= () => {
     //   setMode(data.value);
     // }, []);
   
+    // const [totalClicks, setTotalClicks] = useState(0);
+    // const [totalCommission, setTotalCommission] = useState(0.0);
 
-
-
+    let totalClicks=0;
+    let totalCommission=0.0;
+    let finalCommission=0.0;
     const calculateCustomColumns=(options: DataGridTypes.CustomSummaryInfo)=>{
 
- console.log("options", options)
-
- console.log("totalSummary", totalSummary)
 
  if(options.name==='CPC'){
-options.totalValue=totalSummary.finalAverageCPC
+if (options.summaryProcess === 'start') {
+  options.totalValue = 0;
+}
+
+if (options.summaryProcess === 'calculate') {
+  if (options.value){
+    const clicks = options.value.CLICKS;
+    const commission = parseFloat(options.value["Total Commission"].replace("$ ", ""));
+      totalClicks+=clicks;
+      totalCommission+=commission
+  }
+}
+if (options.summaryProcess === 'finalize') {
+  if (totalClicks > 0) {
+    options.totalValue = (totalCommission / totalClicks).toFixed(2);
+  }
+}
  }else if(options.name==='CTR'){
        options.totalValue=totalSummary.finalAverageCTR
  }else if(options.name==='commission'){
-options.totalValue=totalSummary.finalCommission
+  // let totalCommission=0.0;
+      if (options.summaryProcess === 'start') {
+        options.totalValue = 0;
+        // totalClicks=0
+      //  totalCommission=0.0
+      }
+
+      if (options.summaryProcess === 'calculate') {
+        if (options.value){
+          const commissionValue=parseFloat(options.value["Total Commission"].replace("$ ", ""))
+          finalCommission+= commissionValue
+        }
+      }
+
+      if (options.summaryProcess === 'finalize') {
+       
+          options.totalValue = finalCommission.toFixed(2);
+        
+      }
+
+
+// options.totalValue=totalSummary.finalCommission
+ }else if(options.name==="clickSummary"){
+  // console.log("Option",+ " " +"name  "+ options.name+"value"+"  " +options.value)
+  if (options.summaryProcess === 'start') {
+    options.totalValue = 0;
+  }
+
+  if (options.value){
+    options.totalValue +=options.value.CLICKS
+  }
+ 
+ }else if(options.name==="requestSummary"){
+  if (options.summaryProcess === 'start') {
+    options.totalValue = 0;
+  }
+  if (options.value){
+    options.totalValue +=options.value.Ad_Requests
+  }
+  // options.totalValue +=options.value
  }
     }
     
@@ -97,19 +154,51 @@ options.totalValue=totalSummary.finalCommission
     }
     <Export enabled={true} />
     <Summary calculateCustomSummary={calculateCustomColumns} >
-      <TotalItem
+      {/* <TotalItem
         name="clickSummary"
         summaryType="count"
         // valueFormat="currency"
         // displayFormat="Sum: {0}"
         showInColumn="CLICKS"
+      /> */}
+        <GroupItem
+        showInColumn="CLICKS"
+        summaryType="custom"
+        displayFormat="Sum: {0}"
+        alignByColumn={true}
+        name="clickSummary"
+        showInGroupFooter={true}
       />
-       <TotalItem
+          <GroupItem
+         showInColumn="Ad_Requests"
+        summaryType="custom"
+        displayFormat="Sum: {0}"
+        alignByColumn={true}
+        name="requestSummary"
+        showInGroupFooter={true}
+      />
+          <GroupItem
+        showInColumn="CPC"
+        summaryType="custom"
+        displayFormat="Average CPC: $ {0}"
+        alignByColumn={true}
+        name="CPC"
+        showInGroupFooter={true}
+      />
+           <GroupItem
+        showInColumn="Total Commission"
+        summaryType="custom"
+        displayFormat="Commission: $ {0}"
+        alignByColumn={true}
+        name="commission"
+        showInGroupFooter={true}
+      />
+       {/* <TotalItem
         name="requestSummary"
         summaryType="count"
         // valueFormat="currency"
         // displayFormat="Sum: {0}"
-        showInColumn="Ad_Requests"
+          
       />
         <TotalItem
         name="CPC"
@@ -124,6 +213,7 @@ options.totalValue=totalSummary.finalCommission
         // valueFormat="currency"
         displayFormat="Commission: $ {0}"
         showInColumn="Total Commission"
+        // showInGroupFooter={true}
       />
        <TotalItem
         name="CTR"
@@ -131,8 +221,9 @@ options.totalValue=totalSummary.finalCommission
         // valueFormat="currency"
         displayFormat="Average CTR: {0}"
         showInColumn="CTR"
-      />
+      /> */}
     </Summary>
+    <SortByGroupSummaryInfo  />
   </DataGrid>
 )};
 
